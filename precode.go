@@ -50,7 +50,7 @@ func getTask(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
-	res.Write(respon)
+	_, _ = res.Write(respon)
 }
 
 // postTask эндпоинт для создания задачи
@@ -68,6 +68,10 @@ func postTask(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	if _, check := tasks[task.ID]; check {
+		http.Error(res, "Такая задача уже существует", http.StatusConflict)
 	}
 
 	tasks[task.ID] = task
@@ -95,7 +99,7 @@ func getTaskId(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusOK)
-	res.Write(resp)
+	_, _ = res.Write(resp)
 }
 
 // deleteTask эндпоинт для удаления задачи
@@ -106,12 +110,11 @@ func deleteTask(res http.ResponseWriter, req *http.Request) {
 	if !ok {
 		http.Error(res, "Такого ID нет, или он удален", http.StatusNoContent)
 		return
-	} else {
-		delete(tasks, id)
-		res.Header().Set("Content-Type", "application/json")
-		res.WriteHeader(http.StatusOK)
 	}
 
+	delete(tasks, id)
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
 }
 
 func main() {
